@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       ">
+
+    <context:component-scan base-package="com.catapult.spring.shoping.auth"/>
+    <!--
+        As of Spring Security 3.1.x,
+        this is how to define url patterns without security check
+    -->
+    <security:http pattern="/resources/**" security="none"/>
+
+    <security:http use-expressions="true" access-denied-page="/view/error/denied.jsp">
+        <security:intercept-url pattern="/" access="permitAll" />
+        <security:intercept-url pattern="/index.jsp" access="permitAll" />
+
+        <!-- Default Access -->
+        <security:intercept-url pattern="/**" access="isAuthenticated()" />
+
+        <!-- form login -->
+        <security:form-login login-page="${default.secured.login}"
+                             authentication-failure-url="${default.secured.login}?failed"
+                             login-processing-url="/login"
+                             always-use-default-target="true"
+                             default-target-url="${default.secured.home}"
+                            authentication-success-handler-ref="authSuccessHandler"/>
+
+        <!-- logout -->
+        <security:logout logout-url="/logout"/>
+    </security:http>
+    
+    <bean id="authSuccessHandler" class="com.catapult.spring.shoping.auth.AuthSuccessHandler"/>
+
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider ref="authenticationProvider"/>
+    </security:authentication-manager>
+
+    <!--
+        handles the actual authentication
+    -->
+    <bean id="authenticationProvider" class="org.springframework.security.authentication.dao.DaoAuthenticationProvider">
+        <!-- "userDetailsService" is declared via annotations -->
+        <property name="userDetailsService" ref="userService"/>
+        <property name="passwordEncoder" ref="md5Encoder"/>
+    </bean>
+
+    <bean id="md5Encoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder"/>
+    <bean id="userService" class="com.catapult.spring.shoping.auth.UserService"/>
+
+</beans>

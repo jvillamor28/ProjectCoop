@@ -1,0 +1,17 @@
+/********************************** my edit *******************************/
+
+ul.subnav{
+	position:relative;
+	display:none;
+	position: absolute;
+	width: 190px;
+	z-index: 1;
+	padding: 0 0 30px;
+	background:#FFD405;
+}
+
+ul.view-list li{
+	list-style:none !important;
+}
+
+
